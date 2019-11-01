@@ -916,10 +916,10 @@ f.close()
 '''
 end = time.time()
 elapsed = (end - start)/60
-print "Time to completion: " + str(elapsed) + " minutes."
-print "Number of files: " + str(len(file_path))
-print "Number of rows: " + str(len(out_df))
-print "Numer of errors: " + str(len(file_path) - len(out_df))
+print("Time to completion: " + str(elapsed) + " minutes.")
+print("Number of files: " + str(len(file_path)))
+print("Number of rows: " + str(len(out_df)))
+print("Numer of errors: " + str(len(file_path) - len(out_df)))
 '''
 data = df[0]
 

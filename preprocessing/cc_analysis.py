@@ -106,9 +106,9 @@ reg = smf.ols('spread ~ exmkt + SMB + HML', data=merged).fit(cov_type='HAC', cov
 reg = smf.ols('spread ~ exmkt + SMB + HML + RMW + CMA', data=merged).fit(cov_type='HAC', cov_kwds={'maxlags':4})
 reg = smf.ols('spread ~ exmkt + SMB + HML + RMW + CMA + MOM', data=merged).fit(cov_type='HAC', cov_kwds={'maxlags':4})
 # Annualize the monthly Alpha
-print reg.summary()
+print(reg.summary())
 alpha = reg.params[0] / 100
-print 'Annualize Alpha: ' + str((((1 + alpha)**(4)) - 1)*100) + ' with t-stat: ' + str(reg.tvalues[0])
+print('Annualize Alpha: ' + str((((1 + alpha)**(4)) - 1)*100) + ' with t-stat: ' + str(reg.tvalues[0]))
 
 
 #------------------------------------------------------------------------------
