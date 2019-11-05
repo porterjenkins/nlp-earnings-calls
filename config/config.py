@@ -1,5 +1,5 @@
 import json
 
 
-with open("config.json") as f:
+with open('../config/config.json') as f:
     vals = json.load(f)
