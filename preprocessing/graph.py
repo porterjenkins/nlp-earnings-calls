@@ -4,11 +4,10 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import config.config as cfg
 import numpy as np
 import random
-from nltk.corpus import stopwords
-import string
+from documents.document import Document
+
 
 class DocGraph(object):
-    stop = set(stopwords.words('english') + ['would', 'thing', 'question', 'could', ''])
 
     def __init__(self):
        self.doc_cntr = 0
@@ -16,38 +15,50 @@ class DocGraph(object):
        self.edge_list = set()
 
 
-    def add_node(self, doc):
+    def get_doc(self, text):
+        return self.docs.get(text, None)
+
+
+    def add_node(self, doc, min_token_cnt=3):
         """
 
         :param doc: str
         :return:
         """
-        if doc not in self.docs:
-            self.docs[doc] = self.doc_cntr
+        if doc not in self.docs and len(doc.tokens) > min_token_cnt:
+            doc.set_id(self.doc_cntr)
+            self.docs[doc.text] = doc
             self.doc_cntr += 1
 
 
     def write(self):
         print("writing edge list and document codes")
         with open(cfg.vals["clean_data_dir"] + "doc-list.txt", 'w') as f:
-            for text, idx in self.docs.items():
-                text_clean = DocGraph.clean_doc(text)
-                f.write("{}\t".format(idx))
-                for char in text_clean:
-                    f.write("{} ".format(char))
-                f.write("\n")
+            with open(cfg.vals["clean_data_dir"] + "doc-meta-data.csv", 'w') as f2:
+                cntr = 0
+                for text, doc in self.docs.items():
+                    f.write("{}\t".format(doc.id))
+                    for char in doc.tokens:
+                        f.write("{} ".format(char))
+                    f.write("\n")
+
+                    f2.write("{}, {}, {}\n".format(doc.id, doc.speaker, doc.speaker_type))
+
+
+                    cntr += 1
 
 
         with open(cfg.vals["clean_data_dir"] + "edge-list.txt", 'w') as f:
             for edge in self.edge_list:
-                f.write("{}, {}\n".format(edge[0], edge[1]))
+                f.write("{}, {}\n".format(edge[0].id, edge[1].id))
 
 
     def add_edge(self, doc_1, doc_2):
-        doc_1_id = self.docs[doc_1]
-        doc_2_id = self.docs[doc_2]
+        if doc_1 in self.docs and doc_2 in self.docs:
+            doc_1_id = self.docs[doc_1]
+            doc_2_id = self.docs[doc_2]
 
-        self.edge_list.add((doc_1_id, doc_2_id))
+            self.edge_list.add((doc_1_id, doc_2_id))
 
 
     def load_graph(self, fname, nrows=None):
@@ -93,13 +104,6 @@ class DocGraph(object):
                 except KeyError:
                     continue
 
-                #doc_1_tokenized = DocGraph.clean_doc(doc_1)
-                #doc_2_tokenized = DocGraph.clean_doc(doc_2)
-
-                #for char in doc_1_tokenized:
-                #    f.write(char + " ")
-                #f.write("\t")
-
                 f.write("{}\t{}".format(doc_1, doc_2))
 
 
@@ -111,19 +115,4 @@ class DocGraph(object):
                 for presentation_doc in vals['text']:
                     for q_a_doc in vals_2['text']:
                         doc_graph.add_edge(presentation_doc, q_a_doc)
-
-
-    @classmethod
-    def clean_doc(cls, doc):
-        doc_tokenized = []
-        for word in doc.split():
-            word = word.translate(str.maketrans('', '', string.punctuation))
-            word = word.lower()
-            if word not in DocGraph.stop:
-                doc_tokenized.append(word)
-        return doc_tokenized
-
-
-
-
 

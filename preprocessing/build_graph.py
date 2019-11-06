@@ -18,13 +18,13 @@ for cntr, f in enumerate(files):
     if f == '.DS_Store':
         continue
     try:
-        prepared_remarks, managers_qa, analysts_qa, data = loopem(fname, doc_graph)
+        doc_graph = loopem(fname, doc_graph)
         success_cntr += 1
     except (AttributeError, KeyError, IndexError) as err:
         pass
 
     progress = 100 * ((cntr + 1) / n_files)
-    print("Progress: {:.4f}".format(progress), end='\r')
+    print("Progress: {:.2f}%".format(progress), end='\r')
 
 
 print("{}/{} successfully extracted".format(success_cntr, n_files))

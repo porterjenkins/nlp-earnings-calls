@@ -60,6 +60,7 @@ from joblib import Parallel, delayed
 import multiprocessing
 from collections import Counter
 from preprocessing.graph import DocGraph
+from documents.document import Document
 
 def read_file(filepath):
     """ Facilitates reading in xml file, and reading multiple xml files simultaneously.
@@ -131,12 +132,13 @@ def assign_attendee(d, attendees, doc_graph=None):
     prev_a = ''
     prev_doc = ''
 
-    for key, value in d.items():
+    for key, doc in d.items():
         name_split = key.split("[")
         a = name_split[0].strip().split(",")[0].strip()
         #doc_idx = int(name_split[-1].split("]")[0].strip())
+        if a not in attendees:
+            continue
 
-        doc = clean_doc(value)
     # Add in job and participant type info
         if a not in new_d:
             new_d[a]['doc_idx'] = []
@@ -158,6 +160,11 @@ def assign_attendee(d, attendees, doc_graph=None):
             if prev_a in new_d and new_d[prev_a]['group'] == 'Conference Call Participants' and new_d[a]['group'] == 'Corporate Participants':
                 # add edge
                 doc_graph.add_edge(prev_doc, doc)
+
+            document = doc_graph.get_doc(doc)
+            if document is not None:
+                document.set_speaker_type(new_d[a]['group'])
+                document.set_speaker(a)
 
 
         prev_a = a
@@ -223,7 +230,10 @@ def assign_text_to_speaker(body, doc_graph):
             heading, d = process_dashed_sections(section)
             talks_d.update({heading: d})
             for speaker, text in d.items():
-                    doc = clean_doc(text)
+                if 'operator' in speaker.lower():
+                    continue
+                else:
+                    doc = Document(text=text)
                     doc_graph.add_node(doc)
             
         # Else its just some random text.
@@ -238,7 +248,7 @@ def assign_text_to_speaker(body, doc_graph):
     for key, value in talks_d.items():
         talks_d[key] = assign_attendee(value, ppl_d, doc_graph)
     
-    return talks_d
+    return talks_d, doc_graph
 
 
 def divide_in_two(body, sections):
@@ -467,9 +477,9 @@ def loopem(filepath, doc_graph):
     # Get the body of the text from the call; produce preliminary DataFrame with call details
     body, data = get_attributes(soup)
     # Group call by participants and their text
-    call_dict = assign_text_to_speaker(body, doc_graph) # have to modify this function for current transcript 503124
+    call_dict, doc_graph = assign_text_to_speaker(body, doc_graph) # have to modify this function for current transcript 503124
     # Split the call between prepared remarks and q&a sections
-    split = prepared_qa_split(body)
+    """split = prepared_qa_split(body)
     # Assign participant names if call is not formatted to do so automatically
     test_list = []
     for k,v in split['prepared'].items():
@@ -493,9 +503,9 @@ def loopem(filepath, doc_graph):
     except KeyError:
         pres_dict = list(call_dict.keys())[0]
         qq_dict = list(call_dict.keys())[1]
-        DocGraph.build_graph(doc_graph, call_dict[pres_dict], call_dict[qq_dict])
+        DocGraph.build_graph(doc_graph, call_dict[pres_dict], call_dict[qq_dict])"""
 
-    return prepared_remarks, managers_qa, analysts_qa, data
+    return doc_graph
 
 
 # Remove stop words
@@ -515,10 +525,6 @@ def clean(doc):
     return normalized
 
 
-def clean_doc(text):
-    """Process raw text"""
-
-    return text.strip().replace("\n", "")
 
 
 
