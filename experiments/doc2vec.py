@@ -6,7 +6,7 @@ from gensim.models.doc2vec import Doc2Vec, TaggedDocument
 from utils import load_docs
 
 
-docs = load_docs(cfg.vals["clean_data_dir"] + "doc-list.txt", 100)
+docs = load_docs(cfg.vals["clean_data_dir"] + "doc-list.txt")
 documents = [TaggedDocument(doc, [i]) for i, doc in docs.items()]
 print("training model...")
 model = Doc2Vec(documents, vector_size=cfg.vals['hidden_size'], window=2, min_count=1, workers=4)

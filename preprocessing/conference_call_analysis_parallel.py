@@ -234,7 +234,7 @@ def assign_text_to_speaker(body, doc_graph):
                     continue
                 else:
                     doc = Document(text=text)
-                    doc_graph.add_node(doc)
+                    doc_graph.add_node(doc, text)
             
         # Else its just some random text.
         else:
