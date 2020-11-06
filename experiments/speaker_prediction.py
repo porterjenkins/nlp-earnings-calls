@@ -86,7 +86,7 @@ print(test_starspace.shape)
 
 embed = {"doc2vec": doc2vec,
          "lda": lda,
-         "starspace": starspace}
+         "proposed": starspace}
 
 idx = []
 results = []
@@ -105,15 +105,15 @@ for label, dta in embed.items():
     results.append([acc, auc_roc, f1, precision, recall, ap])
 
     plt.plot(fpr, tpr,
-             lw=2, label='{} (auc = {:.4f})'.format(label, auc_roc))
+             lw=2, label='{} (auc = {:.2f})'.format(label, auc_roc))
 
 
 plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
 plt.xlim([0.0, 1.0])
 plt.ylim([0.0, 1.05])
-plt.xlabel('False Positive Rate')
-plt.ylabel('True Positive Rate')
-plt.legend(loc="lower right")
+plt.xlabel('False Positive Rate', fontsize=20)
+plt.ylabel('True Positive Rate', fontsize=20)
+plt.legend(loc="lower right", fontsize=18)
 plt.savefig("auc-roc.pdf")
 
 out = pd.DataFrame(results, columns=cols, index=idx)

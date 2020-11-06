@@ -1,6 +1,4 @@
-import os
-import sys
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+""
 from preprocessing.conference_call_analysis_parallel import loopem
 import config.config as cfg
 from preprocessing.graph import DocGraph
